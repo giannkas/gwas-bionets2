@@ -1,12 +1,5 @@
 #!/usr/bin/env nextflow
 
-params.out = '.'
-params.k = 1
-params.scores = ""
-
-tsv = file("${params.scores}")
-filename = tsv.baseName
-
 /////////////////////////////////////
 //  CHUNK PREPARATION
 /////////////////////////////////////
@@ -15,20 +8,16 @@ process make_chunks {
   publishDir { params.out + (params.k > 1 ? '/scores_chunks/scores_chunk_' + task.index : '') }, overwrite: true, mode: "copy"
 
   input:
-    val SCORES from tsv
-    val I from 1..params.k
-    val K from params.k
-    val prx from filename
+    path scores_file
+    val filename
+    val K
+    val I from 1..K
 
   output:
     path { filename + (K > 1 ? "_chunk_" + I : '') + ".tsv" } into chunks
 
   script:
-    //def chunk_suffix = K > 1 ? "_chunk_${I}" : ""
-
-  // template 'genotypes/chunk_scores.sh'
-
-  
+      
   """
     #!/usr/bin/env Rscript
 
@@ -58,15 +47,34 @@ process make_chunks {
       chunk <- scores[-(exclude_start:exclude_end), ]
 
       #create filename based on chunk number
-      outfile <- paste0("${prx}", chunk_suffix, ".tsv")
+      outfile <- paste0("${filename}", chunk_suffix, ".tsv")
       
       #write.table(chunks[[i]], file = outfile, sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
       
       #write the chunk to a tsv file with row.names=FALSE to avoid saving row names
       write.table(chunk, file = outfile, sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
       #}
-  """
-  
+  """  
 
 }
 
+// Parameters
+params.out = '.'
+params.k = 1
+params.scores = null
+
+// Input Validation
+if (!params.scores) {
+    log.error "Error: --scores parameter must be specified."
+    exit 1
+}
+
+// Extract filename and basename from the scores file
+scores_file = file(params.scores)
+filename = scores_file.baseName
+
+// Workflow
+workflow {
+  val K = params.k
+  def chunks = make_chunks(scores_file, filename, K)
+}

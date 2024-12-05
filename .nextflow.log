@@ -1,0 +1,248 @@
+Nov-22 12:47:42.024 [main] DEBUG nextflow.cli.Launcher - $> nextflow ./bin/bionets.nf
+Nov-22 12:47:42.088 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 24.10.1
+Nov-22 12:47:42.120 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/giannkas/.nextflow/plugins; core-plugins: nf-amazon@2.9.1,nf-azure@1.10.2,nf-cloudcache@0.4.2,nf-codecommit@0.2.2,nf-console@1.1.4,nf-google@1.15.2,nf-tower@1.9.3,nf-wave@1.7.3
+Nov-22 12:47:42.154 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Nov-22 12:47:42.155 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Nov-22 12:47:42.160 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Nov-22 12:47:42.173 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Nov-22 12:47:42.195 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/nextflow.config
+Nov-22 12:47:42.199 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/nextflow.config
+Nov-22 12:47:42.231 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/giannkas/.nextflow/secrets/store.json
+Nov-22 12:47:42.235 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@732bb66d] - activable => nextflow.secret.LocalSecretsProvider@732bb66d
+Nov-22 12:47:42.252 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Nov-22 12:47:42.680 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 by global default
+Nov-22 12:47:42.694 [main] DEBUG nextflow.cli.CmdRun - Launching `./bin/bionets.nf` [sad_khorana] DSL2 - revision: ea1e87888d
+Nov-22 12:47:42.696 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Nov-22 12:47:42.696 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Nov-22 12:47:42.747 [main] DEBUG nextflow.Session - Session UUID: 3a4e8fef-41b5-400f-88cb-1d70ec758b6a
+Nov-22 12:47:42.748 [main] DEBUG nextflow.Session - Run name: sad_khorana
+Nov-22 12:47:42.748 [main] DEBUG nextflow.Session - Executor pool size: 12
+Nov-22 12:47:42.756 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Nov-22 12:47:42.760 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Nov-22 12:47:42.776 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 24.10.1 build 5930
+  Created: 18-11-2024 12:21 UTC (13:21 CEST)
+  System: Linux 6.8.0-48-generic
+  Runtime: Groovy 4.0.23 on Java HotSpot(TM) 64-Bit Server VM 23.0.1+11-39
+  Encoding: UTF-8 (UTF-8)
+  Process: 402680@giannkas-ThinkPad-P1-Gen-2 [127.0.1.1]
+  CPUs: 12 - Mem: 31 GB (7.5 GB) - Swap: 8 GB (5 GB)
+Nov-22 12:47:42.814 [main] DEBUG nextflow.Session - Work-dir: /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/work [ext2/ext3]
+Nov-22 12:47:42.814 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/bin/bin
+Nov-22 12:47:42.826 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Nov-22 12:47:42.854 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Nov-22 12:47:42.880 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Nov-22 12:47:42.891 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 13; maxThreads: 1000
+Nov-22 12:47:42.973 [main] DEBUG nextflow.Session - Session start
+Nov-22 12:47:43.204 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+Nov-22 12:47:43.208 [main] DEBUG nextflow.Session - 
+Thread[#34,Thread-1,5,main]
+  java.base@23.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@23.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:269)
+  java.base@23.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:1763)
+  java.base@23.0.1/java.util.concurrent.LinkedBlockingDeque.pollFirst(LinkedBlockingDeque.java:516)
+  java.base@23.0.1/java.util.concurrent.LinkedBlockingDeque.poll(LinkedBlockingDeque.java:684)
+  app//nextflow.util.SimpleAgent.run(SimpleAgent.groovy:89)
+  java.base@23.0.1/java.lang.invoke.LambdaForm$DMH/0x00007f51c31a0800.invokeVirtual(LambdaForm$DMH)
+  java.base@23.0.1/java.lang.invoke.LambdaForm$MH/0x00007f51c3330000.invoke(LambdaForm$MH)
+  java.base@23.0.1/java.lang.invoke.Invokers$Holder.invokeExact_MT(Invokers$Holder)
+  java.base@23.0.1/jdk.internal.reflect.DirectMethodHandleAccessor.invokeImpl(DirectMethodHandleAccessor.java:153)
+  java.base@23.0.1/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+  java.base@23.0.1/java.lang.reflect.Method.invoke(Method.java:580)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1333)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethodClosure(MetaClassImpl.java:1017)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1207)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//groovy.lang.Closure.call(Closure.java:433)
+  app//groovy.lang.Closure.call(Closure.java:412)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@23.0.1/java.lang.Thread.runWith(Thread.java:1588)
+  java.base@23.0.1/java.lang.Thread.run(Thread.java:1575)
+
+Thread[#11,Signal Dispatcher,9,system]
+
+Thread[#19,Notification Thread,9,system]
+
+Thread[#10,Finalizer,8,system]
+  java.base@23.0.1/java.lang.Object.wait0(Native Method)
+  java.base@23.0.1/java.lang.Object.wait(Object.java:378)
+  java.base@23.0.1/java.lang.Object.wait(Object.java:352)
+  java.base@23.0.1/java.lang.ref.NativeReferenceQueue.await(NativeReferenceQueue.java:48)
+  java.base@23.0.1/java.lang.ref.ReferenceQueue.remove0(ReferenceQueue.java:166)
+  java.base@23.0.1/java.lang.ref.NativeReferenceQueue.remove(NativeReferenceQueue.java:89)
+  java.base@23.0.1/java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:173)
+
+Thread[#18,Common-Cleaner,8,InnocuousThreadGroup]
+  java.base@23.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@23.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:269)
+  java.base@23.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:1852)
+  java.base@23.0.1/java.lang.ref.ReferenceQueue.await(ReferenceQueue.java:79)
+  java.base@23.0.1/java.lang.ref.ReferenceQueue.remove0(ReferenceQueue.java:151)
+  java.base@23.0.1/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:229)
+  java.base@23.0.1/jdk.internal.ref.CleanerImpl.run(CleanerImpl.java:140)
+  java.base@23.0.1/java.lang.Thread.runWith(Thread.java:1588)
+  java.base@23.0.1/java.lang.Thread.run(Thread.java:1575)
+  java.base@23.0.1/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:186)
+
+Thread[#35,AnsiLogObserver,5,main]
+  java.base@23.0.1/java.lang.Object.wait0(Native Method)
+  java.base@23.0.1/java.lang.Object.wait(Object.java:378)
+  app//nextflow.trace.AnsiLogObserver.render0(AnsiLogObserver.groovy:185)
+  java.base@23.0.1/java.lang.invoke.DirectMethodHandle$Holder.invokeVirtual(DirectMethodHandle$Holder)
+  java.base@23.0.1/java.lang.invoke.LambdaForm$MH/0x00007f51c3361000.invoke(LambdaForm$MH)
+  java.base@23.0.1/java.lang.invoke.Invokers$Holder.invokeExact_MT(Invokers$Holder)
+  java.base@23.0.1/jdk.internal.reflect.DirectMethodHandleAccessor.invokeImpl(DirectMethodHandleAccessor.java:154)
+  java.base@23.0.1/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+  java.base@23.0.1/java.lang.reflect.Method.invoke(Method.java:580)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1333)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethodClosure(MetaClassImpl.java:1017)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1207)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//groovy.lang.Closure.call(Closure.java:433)
+  app//groovy.lang.Closure.call(Closure.java:412)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@23.0.1/java.lang.Thread.runWith(Thread.java:1588)
+  java.base@23.0.1/java.lang.Thread.run(Thread.java:1575)
+
+Thread[#30,process reaper,10,InnocuousThreadGroup]
+  java.base@23.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@23.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:410)
+  java.base@23.0.1/java.util.concurrent.LinkedTransferQueue$DualNode.await(LinkedTransferQueue.java:452)
+  java.base@23.0.1/java.util.concurrent.SynchronousQueue$Transferer.xferLifo(SynchronousQueue.java:194)
+  java.base@23.0.1/java.util.concurrent.SynchronousQueue.xfer(SynchronousQueue.java:235)
+  java.base@23.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:338)
+  java.base@23.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1069)
+  java.base@23.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1130)
+  java.base@23.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+  java.base@23.0.1/java.lang.Thread.runWith(Thread.java:1588)
+  java.base@23.0.1/java.lang.Thread.run(Thread.java:1575)
+  java.base@23.0.1/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:186)
+
+Thread[#9,Reference Handler,10,system]
+  java.base@23.0.1/java.lang.ref.Reference.waitForReferencePendingList(Native Method)
+  java.base@23.0.1/java.lang.ref.Reference.processPendingReferences(Reference.java:246)
+  java.base@23.0.1/java.lang.ref.Reference$ReferenceHandler.run(Reference.java:208)
+
+Thread[#1,main,5,main]
+  java.base@23.0.1/java.lang.Thread.dumpThreads(Native Method)
+  java.base@23.0.1/java.lang.Thread.getAllStackTraces(Thread.java:2460)
+  app//nextflow.util.SysHelper.dumpThreads(SysHelper.groovy:188)
+  app//nextflow.Session.abort(Session.groovy:800)
+  app//nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:149)
+  app//nextflow.cli.CmdRun.run(CmdRun.groovy:376)
+  app//nextflow.cli.Launcher.run(Launcher.groovy:503)
+  app//nextflow.cli.Launcher.main(Launcher.groovy:658)
+
+Nov-22 12:47:43.211 [main] ERROR nextflow.cli.Launcher - Script compilation error
+- file : /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/bin/bionets.nf
+- cause: unable to resolve class val
+ @ line 162, column 9.
+       val scores = file(params.scores)
+           ^
+
+Script compilation error
+- file : /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/bin/bionets.nf
+- cause: unable to resolve class val
+ @ line 163, column 9.
+       val network = file(params.network)
+           ^
+
+Script compilation error
+- file : /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/bin/bionets.nf
+- cause: unable to resolve class val
+ @ line 164, column 9.
+       val sigmod_path = params.sigmod_path
+           ^
+
+Script compilation error
+- file : /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/bin/bionets.nf
+- cause: unable to resolve class val
+ @ line 165, column 9.
+       val hotnet2_path = params.hotnet2_path
+           ^
+
+4 errors
+
+nextflow.exception.ScriptCompilationException: Script compilation error
+- file : /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/bin/bionets.nf
+- cause: unable to resolve class val
+ @ line 162, column 9.
+       val scores = file(params.scores)
+           ^
+
+Script compilation error
+- file : /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/bin/bionets.nf
+- cause: unable to resolve class val
+ @ line 163, column 9.
+       val network = file(params.network)
+           ^
+
+Script compilation error
+- file : /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/bin/bionets.nf
+- cause: unable to resolve class val
+ @ line 164, column 9.
+       val sigmod_path = params.sigmod_path
+           ^
+
+Script compilation error
+- file : /home/giannkas/Dropbox/vie_francaise/postdoc_cbio/gwas-bionets2/bin/bionets.nf
+- cause: unable to resolve class val
+ @ line 165, column 9.
+       val hotnet2_path = params.hotnet2_path
+           ^
+
+4 errors
+
+	at nextflow.script.ScriptParser.parse0(ScriptParser.groovy:196)
+	at nextflow.script.ScriptParser.parse(ScriptParser.groovy:206)
+	at nextflow.script.ScriptRunner.parseScript(ScriptRunner.groovy:229)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:136)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:376)
+	at nextflow.cli.Launcher.run(Launcher.groovy:503)
+	at nextflow.cli.Launcher.main(Launcher.groovy:658)
+Caused by: org.codehaus.groovy.control.MultipleCompilationErrorsException: startup failed:
+Script_a1959bf33502fb3a: 162: unable to resolve class val
+ @ line 162, column 9.
+       val scores = file(params.scores)
+           ^
+
+Script_a1959bf33502fb3a: 163: unable to resolve class val
+ @ line 163, column 9.
+       val network = file(params.network)
+           ^
+
+Script_a1959bf33502fb3a: 164: unable to resolve class val
+ @ line 164, column 9.
+       val sigmod_path = params.sigmod_path
+           ^
+
+Script_a1959bf33502fb3a: 165: unable to resolve class val
+ @ line 165, column 9.
+       val hotnet2_path = params.hotnet2_path
+           ^
+
+4 errors
+
+	at org.codehaus.groovy.control.ErrorCollector.failIfErrors(ErrorCollector.java:292)
+	at org.codehaus.groovy.control.CompilationUnit$ISourceUnitOperation.doPhaseOperation(CompilationUnit.java:910)
+	at org.codehaus.groovy.control.CompilationUnit.processPhaseOperations(CompilationUnit.java:692)
+	at org.codehaus.groovy.control.CompilationUnit.compile(CompilationUnit.java:666)
+	at groovy.lang.GroovyClassLoader.doParseClass(GroovyClassLoader.java:373)
+	at groovy.lang.GroovyClassLoader.lambda$parseClass$2(GroovyClassLoader.java:316)
+	at org.codehaus.groovy.runtime.memoize.StampedCommonCache.compute(StampedCommonCache.java:163)
+	at org.codehaus.groovy.runtime.memoize.StampedCommonCache.getAndPut(StampedCommonCache.java:154)
+	at groovy.lang.GroovyClassLoader.parseClass(GroovyClassLoader.java:314)
+	at groovy.lang.GroovyShell.parseClass(GroovyShell.java:572)
+	at groovy.lang.GroovyShell.parse(GroovyShell.java:585)
+	at groovy.lang.GroovyShell.parse(GroovyShell.java:639)
+	at groovy.lang.GroovyShell.parse(GroovyShell.java:643)
+	at nextflow.script.ScriptParser.parse0(ScriptParser.groovy:175)
+	... 6 common frames omitted

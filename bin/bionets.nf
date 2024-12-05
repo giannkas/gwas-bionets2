@@ -1,21 +1,106 @@
 #!/usr/bin/env nextflow
 
-log.info ""
-log.info "========================================================"
-log.info "|          [gwas-bionets] - bionets.nf          |"
-log.info "========================================================"
-log.info ""
-log.info "### Script to call different biological network methods ###"
-log.info ""
-log.info ""
-log.info ""
-log.info ""
-log.info "--------------------------------------------------------"
-log.info "This program comes with NO WARRANTY"
-log.info "It is free software, see LICENSE for details about"
-log.info "redistribution and contribution."
-log.info "--------------------------------------------------------"
-log.info ""
+/////////////////////////////////////
+//  HEINZ METHOD
+/////////////////////////////////////
+
+process heinz_call {
+    input:
+      path scores
+      path network
+      val k
+      val d_samp
+      path out
+      val fdr
+      val profile
+
+    script:
+      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${task.index}" : (k > 1 && d_samp == 0) ? "_chunk_${task.index}" : ""
+      def dir_splits = (k > 1 && d_samp != 0) ? "/data_splits/data_split_${task.index}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${task.index}" : ""
+      def ith = (k > 1) ? task.index : 0
+
+      """
+      ${baseDir}/heinz.nf \
+        --scores ${out}${dir_splits}/${scores.baseName}${split_suffix}.tsv \
+        --tab2 ${network} \
+        --out ${out}${dir_splits}/heinz \
+        --fdr ${fdr} \
+        --i ${ith} \
+        --d_samp ${d_samp} \
+        -profile ${profile}
+      """
+}
+
+
+/////////////////////////////////////
+//  SIGMOD METHOD
+/////////////////////////////////////
+
+process sigmod_call {
+    input:
+      path scores
+      path network
+      val k
+      val d_samp
+      path out
+      path sigmod_path
+      val profile
+
+    script:
+      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${task.index}" : (k > 1 && d_samp == 0) ? "_chunk_${task.index}" : ""
+      def dir_splits = (k > 1 && d_samp != 0) ? "/data_splits/data_split_${task.index}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${task.index}" : ""
+      def ith = (k > 1) ? task.index : 0
+
+      """
+      ${baseDir}/sigmod.nf \
+        --scores ${out}${dir_splits}/${scores.baseName}${split_suffix}.tsv \
+        --tab2 ${network} \
+        --sigmod_path ${sigmod_path} \
+        --out ${out}${dir_splits}/sigmod \
+        --i ${ith} \
+        --d_samp ${d_samp} \
+        -profile ${profile}
+      """
+}
+
+/////////////////////////////////////
+//  HOTNET2 METHOD
+/////////////////////////////////////
+
+process hotnet2_call {
+    input:
+      path scores
+      path network
+      val k
+      val d_samp
+      path out
+      val lfdr
+      path hotnet2_path
+      val profile
+
+    script:
+      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${task.index}" : (k > 1 && d_samp == 0) ? "_chunk_${task.index}" : ""
+      def dir_splits = (k > 1 && d_samp != 0) ? "/data_splits/data_split_${task.index}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${task.index}" : ""
+      def ith = (k > 1) ? task.index : 0
+
+      """
+      ${baseDir}/hotnet2.nf \
+        --scores ${out}${dir_splits}/${scores.baseName}${split_suffix}.tsv \
+        --tab2 ${network} \
+        --lfdr_cutoff ${lfdr} \
+        --hotnet2_path ${hotnet2_path} \
+        --out ${out}${dir_splits}/hotnet2 \
+        --i ${ith} \
+        --d_samp ${d_samp} \
+        -profile ${profile}
+      """
+}
+
+// Parameters
+params.out = '.'
+params.k = 1
+params.d_samp = 1
+params.profile = params.profile ?: 'local'
 
 // Help info ##########
 params.help = null
@@ -47,119 +132,41 @@ if (params.help) {
     log.info "  --fdr               0.5 \\"
     log.info "  --lfdr              0.125 \\"
     log.info "  --out               path/to/my_output \\"
-    log.info "  -dsl1 \\"
+    log.info "  -dsl2 \\"
     log.info "  -profile            my_cluster \\"
     log.info ""
 
     exit 0
 }
 
+// Workflow
+workflow {
+  log.info ""
+  log.info "========================================================"
+  log.info "|          [gwas-bionets] - bionets.nf          |"
+  log.info "========================================================"
+  log.info ""
+  log.info "### Script to call different biological network methods ###"
+  log.info ""
+  log.info ""
+  log.info ""
+  log.info ""
+  log.info "--------------------------------------------------------"
+  log.info "This program comes with NO WARRANTY"
+  log.info "It is free software, see LICENSE for details about"
+  log.info "redistribution and contribution."
+  log.info "--------------------------------------------------------"
+  log.info ""
 
-params.out = '.'
-params.k = 1
-params.d_samp = 1
-params.profile = params.profile ?: 'local'
+  // Define inputs
+  val scores = file(params.scores)
+  val network = file(params.network)
+  val sigmod_path = params.sigmod_path
+  val hotnet2_path = params.hotnet2_path
 
-
-/////////////////////////////////////
-//  HEINZ METHOD
-/////////////////////////////////////
-
-process heinz_call {
-
-  input:
-    val magma from params.scores
-    val net from params.network
-    val fdr from params.fdr
-    val I from 1..params.k
-    val K from params.k
-    val samp from params.d_samp
-
-  script:
-    def split_suffix = (K > 1 && samp != 0) ? "_split_${I}" : (K > 1 && samp == 0) ? "_chunk_${I}" : ""
-    def dir_splits = (K > 1 && samp != 0) ? "/data_splits/data_split_${I}" : (K > 1 && samp == 0) ? "/scores_chunks/scores_chunk_${I}" : ""
-    def ith = ( K > 1 ) ? I : 0
-
-    """
-      ${baseDir}/heinz.nf \
-        --scores ${params.out}${dir_splits}/${magma}${split_suffix}.tsv \
-        --tab2 ${net} \
-        --out ${params.out}${dir_splits}/heinz \
-        --fdr ${fdr} \
-        --i ${ith} \
-        --d_samp ${samp} \
-        -dsl1 \
-        -with-report ${params.out}${dir_splits}/heinz/log \
-        -profile ${params.profile}
-    """
+  // Run processes inline
+  heinz_call(scores, network, params.k, params.d_samp, params.out, params.fdr, params.profile)
+  sigmod_call(scores, network, params.k, params.d_samp, params.out, sigmod_path, params.profile)
+  hotnet2_call(scores, network, params.k, params.d_samp, params.out, params.lfdr, hotnet2_path, params.profile)
 }
 
-/////////////////////////////////////
-//  SIGMOD METHOD
-/////////////////////////////////////
-
-process sigmod_call {
-
-  input:
-    val magma from params.scores
-    val net from params.network
-    val I from 1..params.k
-    val K from params.k
-    val samp from params.d_samp
-    val sigmod from params.sigmod_path
-
-    script:
-      def split_suffix = (K > 1 && samp != 0) ? "_split_${I}" : (K > 1 && samp == 0) ? "_chunk_${I}" : ""
-      def dir_splits = (K > 1 && samp != 0) ? "/data_splits/data_split_${I}" : (K > 1 && samp == 0) ? "/scores_chunks/scores_chunk_${I}" : ""
-      def ith = ( K > 1 ) ? I : 0
-
-    """
-      ${baseDir}/sigmod.nf \
-        --scores ${params.out}${dir_splits}/${magma}${split_suffix}.tsv \
-        --tab2 ${net} \
-        --sigmod_path ${sigmod}
-        --out ${params.out}${dir_splits}/sigmod \
-        --i ${ith} \
-        --d_samp ${samp} \
-        -dsl1 \
-        -with-report ${params.out}${dir_splits}/sigmod/log \
-        -profile ${params.profile}
-    """
-
-}
-
-/////////////////////////////////////
-//  HOTNET2 METHOD
-/////////////////////////////////////
-
-process hotnet2_call {
-
-  input:
-    val magma from params.scores
-    val net from params.network
-    val I from 1..params.k
-    val lfdr from params.lfdr
-    val K from params.k
-    val samp from params.d_samp
-    val hotnet2 from params.hotnet2_path
-
-  script:
-    def split_suffix = (K > 1 && samp != 0) ? "_split_${I}" : (K > 1 && samp == 0) ? "_chunk_${I}" : ""
-    def dir_splits = (K > 1 && samp != 0) ? "/data_splits/data_split_${I}" : (K > 1 && samp == 0) ? "/scores_chunks/scores_chunk_${I}" : ""
-    def ith = ( K > 1 ) ? I : 0
-
-    """
-      ${baseDir}/hotnet2.nf \
-        --scores ${params.out}${dir_splits}/${magma}${split_suffix}.tsv  \
-        --tab2 ${net} \
-        --lfdr_cutoff ${lfdr} \
-        --hotnet2_path ${hotnet2}
-        --out ${params.out}${dir_splits}/hotnet2 \
-        --i ${ith} \
-        --d_samp ${samp} \
-        -dsl1 \
-        -with-report ${params.out}${dir_splits}/hotnet2/log \
-        -profile ${params.profile}
-    """
-
-}
