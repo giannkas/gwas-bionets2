@@ -180,8 +180,8 @@ params.lfdr_cutoff = 0.05
 def split = (params.i > 0 && params.d_samp != 0) ? "_split_${params.i}" : 
             (params.i > 0 && params.d_samp == 0) ? "_chunk_${params.i}" : ""
 
-def docker_hotnet2 = '/gwas-bionets/hotnet2'
-def HOTNET2 = params.hotnet2_path ? file(params.hotnet2_path) : docker_hotnet2
+def img_hotnet2 = '/gwas-bionets/hotnet2'
+def HOTNET2 = params.hotnet2_path ? file(params.hotnet2_path) : img_hotnet2
 
 def network_permutations = 100
 def heat_permutations = 1000

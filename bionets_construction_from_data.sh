@@ -19,23 +19,21 @@
 # base_out_dir: address to save files, at least an output filename must be given.
 # plink: version of PLINK to use (1 or 2), however MAGMA expects PLINK file to be formatted in the first version.
 # profile: nextflow variable to denote which setting use.
-# dsl1: flag to restrict nextflow on domain-specific language 1 (DSL1), pipeline remains to be updated to DSL2.
 
-bpfiles=""
+bpfiles="/cluster/CBIO/data1/gaguirresamboni/ukb_gwas-tools/data/genotypes/pso_wes/pso_ukb23148_all_chr"
 k=5
-base_out_dir=""
+base_out_dir="data/genotypes/pso_wes"
 plink=1
-profile="local"
+profile="cbio_cluster"
 
-if [ $k -gt 1 ]; then
-  bin/split_data.nf \
-    --bpfile "$bpfiles" \
-    --k $k \
-    --out "$base_out_dir" \
-    --plink $plink \
-    -dsl1 \
-    -profile "$profile"
-fi
+# if [ $k -gt 1 ]; then
+#   nextflow2 run bin_gwas-bionets2/split_data.nf \
+#     --bpfile "$bpfiles" \
+#     --k $k \
+#     --out "$base_out_dir" \
+#     --plink $plink \
+#     --profile "$profile"
+# fi
 
 # Step 2: SNPs P-value computation
 # This step calculates the association between genetic variants (eg. SNPs) and a phenotype of interest (eg. psoriasis).
@@ -44,18 +42,17 @@ fi
 # the folder where data is, prefix parameter will handle to read files.
 # prefix: basename of the genetic data input.
 
-bpfolder=""
-base_out_dir=""
-prefix=""
+bpfolder="/cluster/CBIO/data1/gaguirresamboni/ukb_gwas-tools/data/genotypes/pso_wes"
+base_out_dir="results/psoriasis/magma_scores/magma_output_50kb_window_wes_ncbi38_tab2_dsl2"
+prefix="pso_ukb23148_all_chr"
 
-bin/snps_pvalue.nf \
-  --bpfolder "$bpfolder" \
-  --k $k \
-  --prefix "$prefix" \
-  --plink $plink \
-  --out "$base_out_dir" \
-  -dsl1 \
-  -profile "$profile"
+# nextflow2 run bin_gwas-bionets2/snps_pvalue.nf \
+#   --bpfolder "$bpfolder" \
+#   --k $k \
+#   --prefix "$prefix" \
+#   --plink $plink \
+#   --out "$base_out_dir" \
+#   --profile "$profile"
 
 # Step 3: Basic analysis with MAGMA: annotation and gene analysis steps
 # This step performs an annotation and gene analysis step using MAGMAv1.10 software
@@ -67,25 +64,24 @@ bin/snps_pvalue.nf \
 # magma: path to magma binary file.
 
 window_size=50
-snplocpval=""
-geneloc=""
-geneannot=""
-prefix=""
-magma=""
+snplocpval="/cluster/CBIO/data1/gaguirresamboni/ukb_gwas-tools/results/psoriasis/magma_scores/magma_output_50kb_window_wes_ncbi38_tab2_dsl2"
+geneloc="/cluster/CBIO/data1/gaguirresamboni/ukb_gwas-tools/scripts/additional_tools/magma/genome_data/NCBI38/NCBI38.gene.loc"
+geneannot="/cluster/CBIO/data1/gaguirresamboni/ukb_gwas-tools/results/psoriasis/magma_scores/magma_output_50kb_window_wes_ncbi38_tab2_dsl2"
+prefix="pso_ukb23148_all_chr"
+magma="/cluster/CBIO/data1/gaguirresamboni/ukb_gwas-tools/scripts/additional_tools/magma/magma"
 
-bin/magma_calc.nf \
-  --window "$window_size"\
-  --k $k \
-  --snploc_pval "$snplocpval" \
-  --gene_loc "$geneloc" \
-  --bpfolder "$bpfolder" \
-  --gene_annot "$geneannot" \
-  --prefix "$prefix" \
-  --magma "$magma" \
-  --plink $plink \
-  --out "$base_out_dir" \
-  -dsl1 \
-  -profile "$profile"
+# nextflow2 run bin_gwas-bionets2/magma_calc.nf \
+#   --window "$window_size"\
+#   --k $k \
+#   --snploc_pval "$snplocpval" \
+#   --gene_loc "$geneloc" \
+#   --bpfolder "$bpfolder" \
+#   --gene_annot "$geneannot" \
+#   --prefix "$prefix" \
+#   --magma "$magma" \
+#   --plink $plink \
+#   --out "$base_out_dir" \
+#   --profile "$profile"
 
 # Step 4: Construction of biological networks using different methods: HotNet2, SigMod and Heinz.
 
@@ -99,24 +95,37 @@ bin/magma_calc.nf \
 # sigmod: path to sigmod files with method's internal code.
 # hotnet2: path to hotnet2 files with method's internal code.
 
-net_ref=""
-net_results=""
-magma_scores="pso.scores.genes.out_converted"
+# net_ref="/cluster/CBIO/data1/gaguirresamboni/ukb_gwas-tools/data/network/BIOGRID-MV-Physical-4.4.239.tab2.txt"
+net_ref="/cluster/CBIO/data1/glemoine/ukb_gwas-tools/data/network/biogrid_ppi.tsv"
+net_results="/cluster/CBIO/data1/gaguirresamboni/ukb_gwas-tools/results/psoriasis/magma_scores/magma_output_50kb_window_wes_ncbi38_tab2_dsl2"
+magma_scores="pso.scores.genes.out_converted.tsv"
 fdr=0.5
 lfdr_cutoff=0.125
 data_samp=1
-sigmod_path=""
-hotnet2_path=""
+d=2
+r=0.1
+sigmod_path="/default/path"
+hotnet2_path="/default/path"
+hhotnet_path="/cluster/CBIO/data1/gaguirresamboni/ukb_gwas-tools/bin_gwas-bionets2/hierarchical-hotnet"
+connectivity=1
+permutations=5
+beta=0.5
 
-bin/bionets.nf \
+nextflow2 run bin_gwas-bionets2/bionets.nf \
   --network $net_ref \
   --k $k \
   --d_samp $data_samp \
   --scores $magma_scores \
   --sigmod_path $sigmod_path \
   --hotnet2_path $hotnet2_path \
-  --fdr $fdr \
+  --hhotnet_path $hhotnet_path \
+  --heinz_fdr $fdr \
+  --dmgwas_d $d \
+  --dmgwas_r $r \
   --lfdr $lfdr_cutoff \
+  --conn $connectivity \
+  --perms $permutations \
+  --beta $beta \
   --out $net_results \
-  -dsl1 \
-  -profile $profile
+  -profile "$profile"
+

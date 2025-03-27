@@ -25,13 +25,12 @@ params.lambdamax = 1
 params.nmax = 300
 params.maxjump = 10
 params.sigmod_path = null
-docker_sigmod = '/gwas-bionets/sigmod'
 params.i = 0
 params.d_samp = 1
 
 
-def docker_sigmod = '/gwas-bionets/sigmod'
-def sigmod_path = params.sigmod_path ? file(params.sigmod_path) : docker_sigmod
+def img_sigmod = '/gwas-bionets/sigmod'
+def sigmod_path = params.sigmod_path ? file(params.sigmod_path) : img_sigmod
 
 // Split suffix
 def split = (params.i > 0 && params.d_samp != 0) ? "_split_${params.i}" : 
