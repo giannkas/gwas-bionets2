@@ -2,16 +2,16 @@
 
 process heinz {
 
-  publishDir "$params.out", overwrite: true, mode: "copy"
+  publishDir params.out, overwrite: true, mode: "copy"
 
   input:
-    file MAGMA from scores
-    file TAB2 from tab2
-    val FDR from params.fdr
-    val SPLIT from split
+    path MAGMA
+    path TAB2
+    val FDR
+    val SPLIT
 
   output:
-    file "selected_genes${SPLIT}.heinz.txt" into genes_heinz
+    path "selected_genes${SPLIT}.heinz.txt", emit: genes_heinz
       
   """
   #!/usr/bin/env Rscript
@@ -53,11 +53,12 @@ params.d_samp = 1
 params.tab2 = ''
 params.scores = ''
 
-// annotation
-tab2 = file(params.tab2)
-scores = file(params.scores)
-split = params.i > 0 && params.d_samp != 0 ? "_split_${params.i}" : params.i > 0 && params.d_samp == 0 ? "_chunk_${params.i}" : ""
 
 workflow {
-  heinz()
+  
+  def tab2 = file(params.tab2)
+  def scores = file(params.scores)
+  def split = params.i > 0 && params.d_samp != 0 ? "_split_${params.i}" : params.i > 0 && params.d_samp == 0 ? "_chunk_${params.i}" : ""
+
+  heinz(scores, tab2, params.fdr, split)
 }

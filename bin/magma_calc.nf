@@ -6,26 +6,26 @@
 
 process annotation_step {
 
-  publishDir { params.out + (params.k > 1 ? '/data_splits/data_split_' + task.index : '') }, mode: "copy"
+  publishDir { params.out + (params.k > 1 ? '/stable_consensus/data_splits/data_split_' + I : '') }, mode: "copy"
 
   input:
     val window
     path snplocpval
     path geneloc
-    path magma
+    val magma
     val K
-    val I from 1..K
+    each I
 
   output:
-    path {"pso" + (K > 1 ? "_split_" + I : '') + ".genes.annot" } into genesannot
-    path {"pso" + (K > 1 ? "_split_" + I : '') + ".log" } into annotlog
+    path {"pso" + (K > 1 ? "_split_" + I : '') + ".genes.annot" }, emit: genesannot
+    path {"pso" + (K > 1 ? "_split_" + I : '') + ".log" }, emit: annotlog
 
   script:
     def split_suffix = K > 1 ? "_split_${I}" : ""
-    def dir_splits = K > 1 ? "/data_splits/data_split_${I}" : ""
+    def dir_splits = K > 1 ? "/stable_consensus/data_splits/data_split_${I}" : ""
 
     """
-      ${magma} \
+      $magma \
         --annotate window=${window} \
         --snp-loc ${snplocpval}${dir_splits}/snp_association_plink${split_suffix}.tsv \
         --gene-loc ${geneloc} \
@@ -39,39 +39,39 @@ process annotation_step {
 
 process gene_analysis_step {
 
-  publishDir { params.out + (params.k > 1 ? '/data_splits/data_split_' + task.index : '') }, mode: "copy"
+  publishDir { params.out + (params.k > 1 ? '/stable_consensus/data_splits/data_split_' + task.index : '') }, mode: "copy"
 
   input:
     path data
     path genesannot
     val prefix
     path snplocpval
-    path magma
+    val magma
     val K
     val vplink
-    val I from 1..K
 
   output:
-    path {"pso.scores" + (K > 1 ? "_split_" + I : '') + ".genes.out" } into genelist
-    path {"pso.scores" + (K > 1 ? "_split_" + I : '') + ".genes.raw" } into generaw
-    path {"pso.scores" + (K > 1 ? "_split_" + I : '') + ".log" } into genelog
+    path {"pso.scores" + (K > 1 ? "_split_" + task.index : '') + ".genes.out" }, emit: genesmag
+    path {"pso.scores" + (K > 1 ? "_split_" + task.index : '') + ".genes.raw" }, emit: generaw
+    path {"pso.scores" + (K > 1 ? "_split_" + task.index : '') + ".log" }, emit: genelog
 
 
   script:
-    def split_suffix = K > 1 ? "_split_${I}" : ""
-    def dir_splits = K > 1 ? "/data_splits/data_split_${I}" : ""
+    def split_suffix = K > 1 ? "_split_${task.index}" : ""
+    def dir_splits = K > 1 ? "/data_splits/data_split_${task.index}" : ""
+    def scdir_splits = K > 1 ? "/stable_consensus/data_splits/data_split_${task.index}" : ""
 
     """
-    if [ $plink -eq 1 ]; then
+    if [ $vplink -eq 1 ]; then
       lines=\$(grep -c '^' ${data}${dir_splits}/${prefix}${split_suffix}.fam)
     else
       lines=\$(grep -c '^' ${data}${dir_splits}/${prefix}${split_suffix}.psam)
     fi
 
-      ${magma} \
+      $magma \
         --bfile ${data}${dir_splits}/${prefix}${split_suffix} \
-        --pval ${snplocpval}${dir_splits}/snp_association_plink${split_suffix}.tsv N=\$lines \
-        --gene-annot ${annot} \
+        --pval ${snplocpval}${scdir_splits}/snp_association_plink${split_suffix}.tsv N=\$lines \
+        --gene-annot ${genesannot} \
         --out pso.scores${split_suffix}
     """
 
@@ -81,22 +81,21 @@ process gene_analysis_step {
 //  FORMATTING GENE IDS FOR COMPATIBILITY
 //////////////////////////////////////////////
 
-process snps_pvalue_reformat {
+process gene_ids_reformat {
 
-  publishDir { params.out + (params.k > 1 ? '/data_splits/data_split_' + task.index : '') }, mode: "copy"
+  publishDir { params.out + (params.k > 1 ? '/stable_consensus/data_splits/data_split_' + task.index : '') }, mode: "copy"
 
 
   input:
     path genesmag
     val K
-    val I from 1..K
 
   output:
-    path {"pso.scores.genes.out_converted" + (K > 1 ? "_split_" + I : '') + ".tsv" } into new_snppvalues
+    path {"pso.scores.genes.out_converted" + (K > 1 ? "_split_" + task.index : '') + ".tsv" }, emit: new_geneids
 
   script:
-    def split_suffix = K > 1 ? "_split_${I}" : ""
-    def dir_splits = K > 1 ? "/data_splits/data_split_${I}" : ""
+    def split_suffix = K > 1 ? "_split_${task.index}" : ""
+    def dir_splits = K > 1 ? "/data_splits/data_split_${task.index}" : ""
 
     """
       #!/usr/bin/env Rscript
@@ -125,7 +124,28 @@ params.prefix = ""
 
 // Help info ##########
 params.help = null
-if (params.help) {
+
+// Workflow
+workflow {
+  log.info ""
+  log.info "========================================================"
+  log.info "|          [gwas-bionets] - magma_calc.nf          |"
+  log.info "========================================================"
+  log.info ""
+  log.info "### Annotation (to map SNPs onto genes) and ###"
+  log.info "### gene analysis steps (to compute gene p-values). ###"
+  log.info "### See MAGMAv1.10 user manual as reference. ###"
+  log.info ""
+  log.info ""
+  log.info ""
+  log.info "--------------------------------------------------------"
+  log.info "This program comes with NO WARRANTY"
+  log.info "It is free software, see LICENSE for details about"
+  log.info "redistribution and contribution."
+  log.info "--------------------------------------------------------"
+  log.info ""
+
+  if (params.help) {
     log.info ""
     log.info "Usage : magma_calc.nf --magma <binmagma> --window <window_size> --k <knumber> --snploc_pval <snps_file> --gene_loc <genes_file> \\"
     log.info "                      --bpfolder <genetic_data> --prefix <my_prefix> --plink <pversion> --gene_annot <annot_file> \\"
@@ -167,45 +187,27 @@ if (params.help) {
     log.info ""
 
     exit 0
-}
-
-// Workflow
-workflow {
-  log.info ""
-  log.info "========================================================"
-  log.info "|          [gwas-bionets] - magma_calc.nf          |"
-  log.info "========================================================"
-  log.info ""
-  log.info "### Annotation (to map SNPs onto genes) and ###"
-  log.info "### gene analysis steps (to compute gene p-values). ###"
-  log.info "### See MAGMAv1.10 user manual as reference. ###"
-  log.info ""
-  log.info ""
-  log.info ""
-  log.info "--------------------------------------------------------"
-  log.info "This program comes with NO WARRANTY"
-  log.info "It is free software, see LICENSE for details about"
-  log.info "redistribution and contribution."
-  log.info "--------------------------------------------------------"
-  log.info ""
+  }
 
   // Define inputs
-  val data = params.bpfolder
-  val window = params.window
-  val snplocpval = file(params.snploc_pval)
-  val geneloc = file(params.gene_loc)
-  val magma = file(params.magma)
-  val K = params.k
-  val prefix = params.prefix
-  val vplink = params.plink
+  def data = params.bpfolder
+  def window = params.window
+  def snplocpval = file(params.snploc_pval)
+  def geneloc = file(params.gene_loc)
+  def magma = file(params.magma)
+  def K = params.k
+  def prefix = params.prefix
+  def vplink = params.plink
+
+  //println "The value of magma is: ${magma}"
 
 
-  def genesannot = annotation_step(
-    window, snplocpval, geneloc, magma, K)
+  annotation_step(
+    window, snplocpval, geneloc, magma, K, 1..K)
 
-  def genesmag, generaw, genelog = gene_analysis_step(
-    data, genesannot, prefix, snplocpval, magma, K, vplink)
+  gene_analysis_step(
+    data, annotation_step.out.genesannot, prefix, snplocpval, magma, K, vplink)
 
-  def new_snppvalues = snps_pvalue_reformat(genesmag, K)
+  gene_ids_reformat(gene_analysis_step.out.genesmag, K)
 
 }

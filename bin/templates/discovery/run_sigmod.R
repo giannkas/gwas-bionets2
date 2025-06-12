@@ -6,9 +6,10 @@ library(tidyverse)
 require(igraph)
 scripts <- list.files('${SIGMOD_PATH}/R', pattern='*.R\$', full.names=TRUE, ignore.case=TRUE)
 sapply(scripts, source, .GlobalEnv)
+cat("${SIGMOD_PATH}/R: ", "\n", sep="")
 
 # read network
-net <- read_tsv("${TAB2}") %>%
+net <- read_tsv("${NETWORK}") %>%
 rename(Interactor_A = `Official Symbol Interactor A`, 
         Interactor_B = `Official Symbol Interactor B`) %>%
     select(Interactor_A, Interactor_B) %>%
@@ -16,14 +17,14 @@ rename(Interactor_A = `Official Symbol Interactor A`,
     as.data.frame
 
 # read vegas output
-scores <- read_tsv('${MAGMA_OUT}') %>% 
+scores <- read_tsv('${SCORES}') %>% 
     rename(gene = Gene, p = Pvalue) %>%
     select(gene, p) %>%
     as.data.frame
 
 # check weight_index = NULL
 scored_net <- construct_scored_net(net, interaction_indices = c(1,2), gene_ps = scores)
-res_info <- SigMod_bisection(net = scored_net, lambda_max = ${LAMBDAMAX}, nmax = ${NMAX}, maxjump = ${MAXJUMP})
+res_info <- SigMod_bisection(net = scored_net, lambda_max = $LAMBDA_MAX, nmax = $NMAX, maxjump = $MAXJUMP)
 
 save(scored_net, res_info, file = 'sigmod.RData')
 

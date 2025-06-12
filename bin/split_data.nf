@@ -6,17 +6,17 @@
 
 process make_splits {
 
-  publishDir { params.out + (params.k > 1 ? '/data_splits/data_split_' + task.index : '') }, overwrite: true, mode: "copy"
-
+  publishDir { params.out + (params.k > 1 ? '/data_splits/data_split_' + I : '') }, overwrite: true, mode: "copy"
 
   input:
+    path genbed
     path samfam
     val K
+    each I
     val vplink
-    val I from 1..K
 
   output:
-    path {"${genbed.baseName}" + (K > 1 ? "_split_" + I : '') + (vplink == 1 ? ".fam" : ".psam") } into splits
+    path {"${genbed.baseName}" + (K > 1 ? "_split_" + I : '') + (vplink == 1 ? ".fam" : ".psam") }, emit: splits
 
   script:
     template 'genotypes/split_samples.sh'
@@ -35,17 +35,17 @@ process genbed_varbim_samfam_creation {
   input:
     val data
     path splits
+    path genbed
     val K
     val vplink
-    val I from 1..K
 
   output:
-    path {"${genbed.baseName}" + (K > 1 ? "_split_" + I : '') + (params.plink == 1 ? ".bim" : ".pvar") } into varbims
-    path {"${genbed.baseName}" + (K > 1 ? "_split_" + I : '') + (params.plink == 1 ? ".bed" : ".pgen") } into genbeds
-    path {"${genbed.baseName}" + (K > 1 ? "_split_" + I : '') + (params.plink == 1 ? ".fam" : ".psam") } into samfams
+    path {"${genbed.baseName}" + (K > 1 ? "_split_" + task.index : '') + (params.plink == 1 ? ".bim" : ".pvar") }, emit: varbims
+    path {"${genbed.baseName}" + (K > 1 ? "_split_" + task.index : '') + (params.plink == 1 ? ".bed" : ".pgen") }, emit: genbeds
+    path {"${genbed.baseName}" + (K > 1 ? "_split_" + task.index : '') + (params.plink == 1 ? ".fam" : ".psam") }, emit: samfams
 
   script:
-    def split_suffix = K > 1 ? "_split_${I}" : ""
+    def split_suffix = K > 1 ? "_split_${task.index}" : ""
 
     """
     if [ $vplink -eq 1 ]; then
@@ -58,53 +58,12 @@ process genbed_varbim_samfam_creation {
 
 // Help info ##########
 params.help = null
-if (params.help) {
-  log.info ""
-  log.info "Usage : split_data.nf --bpfile <filepattern> --k <knumber> --out <filename>"
-  log.info ""
-  log.info "  --bpfile      path to pgen/bed, pvar/bim and psam/fam files and only the file prefix needs to be specified."
-  log.info "  --k           number of times data will be split, it must be a non-negative integer."
-  log.info "  --out         path/to/filename where output files will be saved."
-  log.info ""
-  log.info ""
-  log.info ""
-  log.info "Example : "
-  log.info "split_data.nf \\"
-  log.info "  --bpfile             path/to/bpfiles \\"
-  log.info "  --k                 5 \\"
-  log.info "  --out               path/to/myoutput \\"
-  log.info "  -dsl1 \\"
-  log.info "  -profile            my_cluster \\"
-  log.info ""
-
-  exit 0
-}
 
 // default values for the parameters
 params.out = '.'
 params.k = 1
 params.plink = 1
 params.bpfile = null
-
-// Input Validation
-if (!params.bpfile) {
-  log.error "Error: --bpfile parameter must be specified."
-  exit 1
-}
-
-// File assignments based on PLINK version
-def genbed, varbim, samfam
-
-if (params.plink == 1) {
-  val genbed = file("${params.bpfile}.bed")
-  val varbim = file("${genbed.baseName}.bim")
-  val samfam = file("${params.bpfile}.fam")
-} else {
-  val genbed = file("${params.bpfile}.pgen")
-  val varbim = file("${genbed.baseName}.pvar")
-  val samfam = file("${params.bpfile}.psam")
-}
-
 
 workflow {
   log.info ""
@@ -123,15 +82,61 @@ workflow {
   log.info "--------------------------------------------------------"
   log.info ""
 
-  // Define inputs
-  val data = params.bpfile
-  val K = params.k
-  val vplink = params.plink
+  if (params.help) {
+    log.info ""
+    log.info "Usage : split_data.nf --bpfile <filepattern> --k <knumber> --out <filename>"
+    log.info ""
+    log.info "  --bpfile      path to pgen/bed, pvar/bim and psam/fam files and only the file prefix needs to be specified."
+    log.info "  --k           number of times data will be split, it must be a non-negative integer."
+    log.info "  --out         path/to/filename where output files will be saved."
+    log.info ""
+    log.info ""
+    log.info ""
+    log.info "Example : "
+    log.info "split_data.nf \\"
+    log.info "  --bpfile             path/to/bpfiles \\"
+    log.info "  --k                 5 \\"
+    log.info "  --out               path/to/myoutput \\"
+    log.info "  -dsl1 \\"
+    log.info "  -profile            my_cluster \\"
+    log.info ""
+
+    exit 0
+  }
+
+  // Input Validation
+  if (!params.bpfile) {
+    log.error "Error: --bpfile parameter must be specified."
+    exit 1
+  }
+
+  // File assignments based on PLINK version
+  def genbed
+  def varbim
+  def samfam
+
+  if (params.plink == 1) {
+    genbed = file("${params.bpfile}.bed")
+    varbim = file("${genbed.baseName}.bim")
+    samfam = file("${params.bpfile}.fam")
+  } else {
+    genbed = file("${params.bpfile}.pgen")
+    varbim = file("${genbed.baseName}.pvar")
+    samfam = file("${params.bpfile}.psam")
+  }
+
+  //println "The value of samfam is: ${samfam}"
 
   // Step 1: Prepare sample splits
-  def splits = make_splits(samfam, K, vplink)
+  def splits = make_splits(
+    genbed, 
+    samfam, 
+    params.k, 
+    1..params.k, 
+    params.plink
+  )
 
   // Step 2: Generate genotype, variant, and sample files
-  def outputs = genbed_varbim_samfam_creation(data, splits, K, vplink)
+  def outputs = genbed_varbim_samfam_creation(params.bpfile, splits, genbed, params.k, params.plink)
 
 }

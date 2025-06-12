@@ -1,23 +1,43 @@
 #!/usr/bin/env nextflow
 
+// General parameters
+params.out = '.'
+params.k = 1
+params.d_samp = 1
+//params.profile = 'local'
+
+// SigMod parameters
+params.sigmod_lambdamax = 1
+params.sigmod_nmax = 300
+params.sigmod_maxjump = 10
+
+// Heinz parameters
+params.heinz_fdr = 0.2
+
+// dmGWAS parameters
+params.dmgwas_r = 0.1
+params.dmgwas_d = 2
+
+// Help info ##########
+params.help = null
+
 /////////////////////////////////////
 //  HEINZ METHOD
 /////////////////////////////////////
 
 process heinz_call {
     input:
-      path scores
-      path network
+      file scores
+      val network
       val k
       val d_samp
       path out
       val fdr
-      val profile
+      each I
 
     script:
-      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${task.index}" : (k > 1 && d_samp == 0) ? "_chunk_${task.index}" : ""
-      def dir_splits = (k > 1 && d_samp != 0) ? "/data_splits/data_split_${task.index}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${task.index}" : ""
-      def ith = (k > 1) ? task.index : 0
+      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${I}" : (k > 1 && d_samp == 0) ? "_chunk_${I}" : ""
+      def dir_splits = (k > 1 && d_samp != 0) ? "/stable_consensus/data_splits/data_split_${I}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${I}" : ""
 
       """
       ${baseDir}/heinz.nf \
@@ -25,9 +45,41 @@ process heinz_call {
         --tab2 ${network} \
         --out ${out}${dir_splits}/heinz \
         --fdr ${fdr} \
-        --i ${ith} \
+        --i ${I} \
         --d_samp ${d_samp} \
-        -profile ${profile}
+        -profile cluster
+      """
+}
+
+/////////////////////////////////////
+//  DMGWAS METHOD
+/////////////////////////////////////
+
+process dmgwas_call {
+    input:
+      file scores
+      val network
+      val k
+      val d_samp
+      path out
+      val d
+      val r
+      each I
+
+    script:
+      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${I}" : (k > 1 && d_samp == 0) ? "_chunk_${I}" : ""
+      def dir_splits = (k > 1 && d_samp != 0) ? "/stable_consensus/data_splits/data_split_${I}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${I}" : ""
+
+      """
+      ${baseDir}/dmgwas.nf \
+        --scores ${out}${dir_splits}/${scores.baseName}${split_suffix}.tsv \
+        --tab2 ${network} \
+        --out ${out}${dir_splits}/dmgwas \
+        --d ${d} \
+        --r ${r} \
+        --i ${I} \
+        --d_samp ${d_samp} \
+        -profile cluster
       """
 }
 
@@ -38,28 +90,27 @@ process heinz_call {
 
 process sigmod_call {
     input:
-      path scores
-      path network
+      file scores
+      val network
       val k
       val d_samp
       path out
-      path sigmod_path
-      val profile
+      val sigmod_path
+      each I
 
     script:
-      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${task.index}" : (k > 1 && d_samp == 0) ? "_chunk_${task.index}" : ""
-      def dir_splits = (k > 1 && d_samp != 0) ? "/data_splits/data_split_${task.index}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${task.index}" : ""
-      def ith = (k > 1) ? task.index : 0
+      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${I}" : (k > 1 && d_samp == 0) ? "_chunk_${I}" : ""
+      def dir_splits = (k > 1 && d_samp != 0) ? "/stable_consensus/data_splits/data_split_${I}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${I}" : ""
 
       """
       ${baseDir}/sigmod.nf \
         --scores ${out}${dir_splits}/${scores.baseName}${split_suffix}.tsv \
-        --tab2 ${network} \
+        --network ${network} \
         --sigmod_path ${sigmod_path} \
         --out ${out}${dir_splits}/sigmod \
-        --i ${ith} \
+        --i ${I} \
         --d_samp ${d_samp} \
-        -profile ${profile}
+        -profile cluster
       """
 }
 
@@ -69,19 +120,18 @@ process sigmod_call {
 
 process hotnet2_call {
     input:
-      path scores
-      path network
+      file scores
+      val network
       val k
       val d_samp
       path out
       val lfdr
-      path hotnet2_path
-      val profile
+      val hotnet2_path
+      each I
 
     script:
-      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${task.index}" : (k > 1 && d_samp == 0) ? "_chunk_${task.index}" : ""
-      def dir_splits = (k > 1 && d_samp != 0) ? "/data_splits/data_split_${task.index}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${task.index}" : ""
-      def ith = (k > 1) ? task.index : 0
+      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${I}" : (k > 1 && d_samp == 0) ? "_chunk_${I}" : ""
+      def dir_splits = (k > 1 && d_samp != 0) ? "/stable_consensus/data_splits/data_split_${I}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${I}" : ""
 
       """
       ${baseDir}/hotnet2.nf \
@@ -90,21 +140,99 @@ process hotnet2_call {
         --lfdr_cutoff ${lfdr} \
         --hotnet2_path ${hotnet2_path} \
         --out ${out}${dir_splits}/hotnet2 \
-        --i ${ith} \
+        --i ${I} \
         --d_samp ${d_samp} \
-        -profile ${profile}
+        -profile cluster
       """
 }
 
-// Parameters
-params.out = '.'
-params.k = 1
-params.d_samp = 1
-params.profile = params.profile ?: 'local'
+/////////////////////////////////////
+//  HIERARCHICAL HOTNET METHOD
+/////////////////////////////////////
 
-// Help info ##########
-params.help = null
-if (params.help) {
+process hhotnet_call {
+    input:
+      file scores
+      val network
+      val k
+      val d_samp
+      path out
+      val conn
+      val perms
+      val beta
+      val hhotnet_path
+      each I
+
+    script:
+      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${I}" : (k > 1 && d_samp == 0) ? "_chunk_${I}" : ""
+      def dir_splits = (k > 1 && d_samp != 0) ? "/stable_consensus/data_splits/data_split_${I}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${I}" : ""
+
+      """
+      nextflow2 run ${baseDir}/hhotnet_parallel.nf \
+        --scores ${out}${dir_splits}/${scores.baseName}${split_suffix}.tsv \
+        --network ${network} \
+        --connectivity ${conn} \
+        --permutations ${perms} \
+        --beta ${beta} \
+        --hhotnet_path ${hhotnet_path} \
+        --out ${out}${dir_splits}/hhotnet \
+        --i ${I} \
+        --d_samp ${d_samp} \
+        -profile cluster
+      """
+}
+
+/////////////////////////////////////
+//  LEAN METHOD
+/////////////////////////////////////
+
+process lean_call {
+    input:
+      file scores
+      val network
+      val k
+      val d_samp
+      path out
+      val reps      
+      each I
+
+    script:
+      def split_suffix = (k > 1 && d_samp != 0) ? "_split_${I}" : (k > 1 && d_samp == 0) ? "_chunk_${I}" : ""
+      def dir_splits = (k > 1 && d_samp != 0) ? "/stable_consensus/data_splits/data_split_${I}" : (k > 1 && d_samp == 0) ? "/scores_chunks/scores_chunk_${I}" : ""
+
+      """
+      nextflow2 run ${baseDir}/lean.nf \
+        --scores ${out}${dir_splits}/${scores.baseName}${split_suffix}.tsv \
+        --network ${network} \
+        --reps ${reps} \
+        --out ${out}${dir_splits}/lean \
+        --i ${I} \
+        --d_samp ${d_samp} \
+        -profile cluster
+      """
+}
+
+
+// Workflow
+workflow {
+  log.info ""
+  log.info "========================================================"
+  log.info "|          [gwas-bionets] - bionets.nf          |"
+  log.info "========================================================"
+  log.info ""
+  log.info "### Script to call different biological network methods ###"
+  log.info ""
+  log.info ""
+  log.info ""
+  log.info ""
+  log.info "--------------------------------------------------------"
+  log.info "This program comes with NO WARRANTY"
+  log.info "It is free software, see LICENSE for details about"
+  log.info "redistribution and contribution."
+  log.info "--------------------------------------------------------"
+  log.info ""
+
+  if (params.help) {
     log.info ""
     log.info "Usage : bionets.nf --network <network_file> --k <knumber> --d_samp <data_sampling> --scores <scores_file> \\"
     log.info "                      --fdr <false_discovery_rate> --lfdr <lfdr_cutoff>  --out <filename>\\"
@@ -137,36 +265,37 @@ if (params.help) {
     log.info ""
 
     exit 0
-}
-
-// Workflow
-workflow {
-  log.info ""
-  log.info "========================================================"
-  log.info "|          [gwas-bionets] - bionets.nf          |"
-  log.info "========================================================"
-  log.info ""
-  log.info "### Script to call different biological network methods ###"
-  log.info ""
-  log.info ""
-  log.info ""
-  log.info ""
-  log.info "--------------------------------------------------------"
-  log.info "This program comes with NO WARRANTY"
-  log.info "It is free software, see LICENSE for details about"
-  log.info "redistribution and contribution."
-  log.info "--------------------------------------------------------"
-  log.info ""
+  }
 
   // Define inputs
-  val scores = file(params.scores)
-  val network = file(params.network)
-  val sigmod_path = params.sigmod_path
-  val hotnet2_path = params.hotnet2_path
+  def scores = file(params.scores)
+  def network = file(params.network)
+  def sigmod_path = params.sigmod_path
+  def hotnet2_path = params.hotnet2_path
+  def hhotnet_path = params.hhotnet_path
+  def K = params.k
+  def d_samp = params.d_samp
+  def fdr = params.heinz_fdr
+  def lfdr = params.lfdr
+  def conn =  params.conn
+  def perms = params.perms
+  def beta = params.beta
+  def D = params.dmgwas_d
+  def R = params.dmgwas_r
+  def lambdamax = params.sigmod_lambdamax
+  def nmax = params.sigmod_nmax
+  def maxjump = params.sigmod_maxjump
+  def reps = params.reps
+
+  println "The value of out is: ${params.out}"
 
   // Run processes inline
-  heinz_call(scores, network, params.k, params.d_samp, params.out, params.fdr, params.profile)
-  sigmod_call(scores, network, params.k, params.d_samp, params.out, sigmod_path, params.profile)
-  hotnet2_call(scores, network, params.k, params.d_samp, params.out, params.lfdr, hotnet2_path, params.profile)
+  heinz_call(scores, network, K, d_samp, params.out, fdr, 1..K)
+  dmgwas_call(scores, network, K, d_samp, params.out, D, R, 1..K)
+  sigmod_call(scores, network, K, d_samp, params.out, sigmod_path, 1..K)
+  hotnet2_call(scores, network, K, d_samp, params.out, lfdr, hotnet2_path, 1..K)
+  lean_call(scores, network, K, d_samp, params.out, reps, 1..K)
+  hhotnet_call(scores, network, K, d_samp, params.out, conn, perms, beta, hhotnet_path, 1..K)
+  
 }
 

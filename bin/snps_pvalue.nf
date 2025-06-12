@@ -6,18 +6,18 @@
 
 process compute_snps_pvalue {
 
-  publishDir { params.out + (params.k > 1 ? '/data_splits/data_split_' + task.index : '') }, overwrite: true, mode: "copy"
+  publishDir { params.out + (params.k > 1 ? '/stable_consensus/data_splits/data_split_' + I : '') }, overwrite: true, mode: "copy"
 
   input:
     path data
     val prefix
     val K
     val vplink
-    val I from 1..K
+    each I
 
 
   output:
-    file { "snp_association_plink" + (K > 1 ? "_split_" + I : '') + (vplink == 1 ? ".assoc" : ".PHENO1.glm.logistic.hybrid") } into snppvalues
+    path { "snp_association_plink" + (K > 1 ? "_split_" + I : '') + (vplink == 1 ? ".assoc" : ".PHENO1.glm.logistic.hybrid") }, emit: snppvalues
 
   script:
     def split_suffix = K > 1 ? "_split_${I}" : ""
@@ -27,7 +27,7 @@ process compute_snps_pvalue {
     if [ $vplink -eq 1 ]; then
       plink --bfile ${data}${dir_splits}/${prefix}${split_suffix} --assoc --allow-no-sex --out snp_association_plink${split_suffix}
     else
-      plink2 --pfile ${data}${dir_splits}/${prefix}${split_suffix} --glm allow-no-covars --out snp_association_plink${split_suffix}
+      plink2 --pfile ${data}${dir_splits}/${prefix}${split_suffix} --glm allow-no-covars hide-covar --out snp_association_plink${split_suffix}
     fi
 
     """
@@ -42,31 +42,30 @@ process compute_snps_pvalue {
 
 process snps_pvalue_reformat {
 
-  publishDir { params.out + (params.k > 1 ? '/data_splits/data_split_' + task.index : '') }, overwrite: true, mode: "copy"
+  publishDir { params.out + (params.k > 1 ? '/stable_consensus/data_splits/data_split_' + task.index : '') }, overwrite: true, mode: "copy"
 
 
   input:
     path snppvalues
     val K
     val vplink
-    val I from 1..K
 
   output:
-    path { "snp_association_plink" + (K > 1 ? "_split_" + I : '') + ".tsv" } into new_snppvalues
+    path { "snp_association_plink" + (K > 1 ? "_split_" + task.index : '') + ".tsv" }, emit: new_snppvalues
 
   script:
-    def split_suffix = K > 1 ? "_split_${I}" : ""
+    def split_suffix = K > 1 ? "_split_${task.index}" : ""
 
     """
       #!/usr/bin/env Rscript
 
         library(dplyr)
-        if (${V} == 1) {
-          readr::read_table("${assoc}") %>% 
+        if ($vplink == 1) {
+          readr::read_table("$snppvalues") %>% 
           select(SNP, CHR, BP, P) %>%
           readr::write_tsv("snp_association_plink${split_suffix}.tsv")
         } else {
-          readr::read_table("${assoc}") %>% 
+          readr::read_table("$snppvalues") %>% 
           select(ID, `#CHROM`, POS, P) %>%
           rename(SNP = ID, CHR = `#CHROM`, BP = POS) %>%
           readr::write_tsv("snp_association_plink${split_suffix}.tsv")
@@ -84,7 +83,25 @@ params.prefix = ""
 
 // Help info ##########
 params.help = null
-if (params.help) {
+
+workflow {
+  log.info ""
+  log.info "========================================================"
+  log.info "|          [gwas-bionets] - snps_pvalue.nf          |"
+  log.info "========================================================"
+  log.info ""
+  log.info "### General association analysis between SNPs and the trait (eg. psoriasis) ###"
+  log.info ""
+  log.info ""
+  log.info ""
+  log.info "--------------------------------------------------------"
+  log.info "This program comes with NO WARRANTY"
+  log.info "It is free software, see LICENSE for details about"
+  log.info "redistribution and contribution."
+  log.info "--------------------------------------------------------"
+  log.info ""
+
+  if (params.help) {
     log.info ""
     log.info "Usage : snps_pvalue.nf --bpfolder <parent_folder> --k <knumber> --prefix <my_prefix> --plink <pversion> --out <filename>"
     log.info ""
@@ -111,37 +128,14 @@ if (params.help) {
     log.info ""
 
     exit 0
-}
-
-workflow {
-  log.info ""
-  log.info "========================================================"
-  log.info "|          [gwas-bionets] - snps_pvalue.nf          |"
-  log.info "========================================================"
-  log.info ""
-  log.info "### General association analysis between SNPs and the trait (eg. psoriasis) ###"
-  log.info ""
-  log.info ""
-  log.info ""
-  log.info "--------------------------------------------------------"
-  log.info "This program comes with NO WARRANTY"
-  log.info "It is free software, see LICENSE for details about"
-  log.info "redistribution and contribution."
-  log.info "--------------------------------------------------------"
-  log.info ""
-
-  // Define inputs
-  val data = params.bpfolder
-  val K = params.k
-  val prefix = params.prefix
-  val vplink = params.plink
+  }
 
   // Step 1: Compute SNP p-values
   def snppvalues = compute_snps_pvalue(
-    data, prefix, K, vplink)
+    params.bpfolder, params.prefix, params.k, params.plink, 1..params.k)
 
   // Step 2: Reformat SNP p-values
   def new_snppvalues = snps_pvalue_reformat(
-      snppvalues, K, vplink)
+      snppvalues, params.k, params.plink)
 
 }
