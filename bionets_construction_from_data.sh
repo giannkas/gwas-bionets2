@@ -95,7 +95,6 @@ nextflow2 run bin/magma_calc.nf \
 # sigmod: path to sigmod files with method's internal code.
 # hotnet2: path to hotnet2 files with method's internal code.
 
-# net_ref=""
 net_ref=""
 net_results=""
 magma_scores="pso.scores.genes.out_converted.tsv"

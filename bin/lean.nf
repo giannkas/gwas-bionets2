@@ -62,15 +62,29 @@ process lean {
       results <- run.lean(scores, net, n_reps = ${REPS}, add.scored.genes = TRUE)
 
       significant_genes <- tibble(Gene = rownames(results\$restab[results\$restab[,'PLEAN']<=0.05,]))
-      nh_genes <- significant_genes %>%
-        rowwise() %>%
-        mutate(neighbors = list(results\$nhs[[Gene]])) %>%
-        unnest(neighbors)
+      
+      if (nrow(significant_genes) == 0) {
+        warning("No significant genes found. Creating empty output file.")
+        tibble(gene = character(0)) %>%
+          write_tsv('selected_genes${SPLIT}.lean.txt')
+      } else {
+        nh_genes <- significant_genes %>%
+          mutate(neighbors = map(Gene, ~ {
+            if (.x %in% names(results\$nhs)) {
+              results\$nhs[[.x]]
+            } else {
+              character(0)
+            }
+          })) %>%
+          unnest(neighbors)
 
-      nh_genes_unique <- nh_genes %>% 
-        rename(gene = neighbors) %>%
-        distinct(gene) %>%
-        write_tsv('selected_genes${SPLIT}.lean.txt')
+
+        nh_genes_unique <- nh_genes %>% 
+          rename(gene = neighbors) %>%
+          distinct(gene) %>%
+          write_tsv('selected_genes${SPLIT}.lean.txt')
+
+      }
     """
 
 }

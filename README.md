@@ -63,7 +63,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 24.0.1+9-30, mixed mode, sharing)
 
 **Install Nextflow**
 
-People from [sequera](https://seqera.io/) have a better explanation and documentation about Nextflow than I might do, then please follow the [installation steps there](https://www.nextflow.io/docs/latest/install.html#install-nextflow).
+People at [sequera](https://seqera.io/) provide better explanations and documentation about Nextflow than I could offer. Please follow the [installation steps there](https://www.nextflow.io/docs/latest/install.html#install-nextflow).
 
 **Install MAGMA**
 
@@ -190,7 +190,7 @@ R -e "BiocManager::install('twilight')"
 Install R packages, `tidyverse`, `cowplot`, `igraph` and `gprofiler2`:
 
 ```bash
-R -e "install.packages(c('tidyverse', 'cowplot', 'igraph', 'gprofiler2'))" 
+R -e "install.packages(c('tidyverse', 'cowplot', 'igraph', 'gprofiler2', 'foreach'))" 
 ```
 
 **Install LEAN**
