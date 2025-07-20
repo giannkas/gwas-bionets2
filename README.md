@@ -4,7 +4,7 @@ Network-based approaches for gene discovery by leveraging GWAS data
 In comparison with previous version [gwas-bionets](https://github.com/giannkas/gwas-bionets.git), 
 this version is developed using Nextflow domain-specific language 2, and includes more
 network-based methods: Hierarchical HotNet, SigMod, Heinz, dmGWAS, LEAN and HotNet2 (you may exclude it if Hierarchical HotNet is used).
-Although gwas-bionets resembles a previous version of this repository, I decided not to continue in the same repo simply because the technologies are different. I want to ensure that everything is well-documented in case someone needs to reproduce it, especially in HPC environments where permissions are restricted and programs are often outdated by default. Also, I have not decided to include everythin in a container because not all of the methods can be freely distributed to third parties.
+Although gwas-bionets resembles a previous version of this repository, I decided not to continue in the same repo simply because the technologies are different. I want to ensure that everything is well-documented in case someone needs to reproduce it, especially in HPC environments where permissions are restricted and programs are often outdated by default. Also, I have not decided to include everything in a container because not all of the methods can be freely distributed to third parties.
 
 ## Software requirements
 
