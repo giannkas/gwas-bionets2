@@ -1,6 +1,6 @@
 # gwas-bionets2
 
-[![DOI](https://zenodo.org/badge/892543107.svg)](https://doi.org/10.5281/zenodo.18236869)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18236870.svg)](https://doi.org/10.5281/zenodo.18236869)
 
 Network-based approaches for gene discovery by leveraging GWAS data
 
