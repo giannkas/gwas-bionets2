@@ -164,7 +164,7 @@ You can add it to your `.bashrc` file to make it permanent. And then, `source ~/
 
 **Install R and some packages (required for the methods)**
 
-If you dont't have R installed in your machine (add your superuse credentials if needed to install software), then proceed as follows (or you can check instructions from [The Comprehensive R archive Network](https://cloud.r-project.org/)):
+If you dont't have R installed in your machine (add your superuser credentials if needed to install software), then proceed as follows (or you can check instructions from [The Comprehensive R archive Network](https://cloud.r-project.org/)):
 
 ```bash
 wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
@@ -259,6 +259,6 @@ After that, we are all set!
 
 `bionets_construction_from_data.sh`
 
-2. This script works with the scores previously computed using a software like [MAGMA](https://cncr.nl/research/magma/) for the gene P-values. Again, a _k_ parameter greater than 1 generates k-fold solutions. As above, we conceived the script to be modified to provide the parameters.
+2. This script works with the scores previously computed using a software like [MAGMA](https://cncr.nl/research/magma/) for the gene p-values. Again, a _k_ parameter greater than 1 generates k-fold solutions. As above, we conceived the script to be modified to provide the parameters. Note that this script is no longer in use, it can be deprecated.
 
 `bionets_construction_from_scores.sh`
